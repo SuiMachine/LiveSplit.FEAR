@@ -65,7 +65,7 @@ namespace LiveSplit.FEAR
 
         public string UpdateURL
         {
-            get { return ""; }
+            get { return "https://raw.githubusercontent.com/SuiMachine/LiveSplit.FEAR/master/"; }
         }
 
         public Version Version
