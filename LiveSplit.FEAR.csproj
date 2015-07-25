@@ -63,6 +63,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="SafeNativeMethods.cs" />
+    <Compile Include="TrainerRead.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="FEARSettings.resx">

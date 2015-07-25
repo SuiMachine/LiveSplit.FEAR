@@ -10,6 +10,8 @@ namespace LiveSplit.FEAR
 {
     class GameMemory
     {
+        bool isVersion1_0 = false;
+
         public enum SplitArea : int
         {
             None,
@@ -36,7 +38,7 @@ namespace LiveSplit.FEAR
             C11Retaliation,
         }
 
-        public event EventHandler OnFirstLevelLoading;
+        //public event EventHandler OnFirstLevelLoading;
         public event EventHandler OnPlayerGainedControl;
         public event EventHandler OnLoadStarted;
         public event EventHandler OnLoadFinished;
@@ -85,6 +87,8 @@ namespace LiveSplit.FEAR
 
         private enum ExpectedDllSizes
         {
+            FEARv1_0 = 10059776,
+            FEARGOG = 1691648,
             FEARSteam = 29642752,
         }
 
@@ -105,9 +109,6 @@ namespace LiveSplit.FEAR
             splitStates = new bool[(int)SplitArea.C11Retaliation + 1];
 
             resetSplitStates();
-
-            _isLoadingPtr = new DeepPointer(0x00176FCC, 0x10, 0xE0, 0x8, 0x728); // == 1 if a loadscreen is happening
-            _levelNamePtr = new DeepPointer(0x16C036);
 
             _ignorePIDs = new List<int>();
         }
@@ -171,15 +172,19 @@ namespace LiveSplit.FEAR
 
                     while (!game.HasExited)
                     {
+                        bool isLoading;
+                        if (!isVersion1_0)
+                            _isLoadingPtr.Deref(game, out isLoading);
+                        else
+                            isLoading = Convert.ToBoolean(TrainerRead.ReadByte("FEAR", 0x1018CB3C));    //Nice mess, eh?
+                        
+
                         string streamGroupIdCheck = String.Empty;
                         _levelNamePtr.Deref(game, out streamGroupIdCheck, 55);
                         if(streamGroupIdCheck != String.Empty)
                         {
                             streamGroupId = streamGroupIdCheck;                             //Since during loading it changes to null
                         }
-
-                        bool isLoading;
-                        _isLoadingPtr.Deref(game, out isLoading);
 
                         if (streamGroupId != prevStreamGroupId)
                         {
@@ -302,7 +307,6 @@ namespace LiveSplit.FEAR
                             else
                             {
                                 Debug.WriteLine(String.Format("[NoLoads] Load End - {0}", frameCounter));
-
                                 if (loadingStarted)
                                 {
                                     loadingStarted = false;
@@ -330,10 +334,11 @@ namespace LiveSplit.FEAR
                                 }
                             }
                         }
+                        prevIsLoading = isLoading;
 
                         Debug.WriteLineIf(streamGroupId != prevStreamGroupId, String.Format("[NoLoads] streamGroupId changed from {0} to {1} - {2}", prevStreamGroupId, streamGroupId, frameCounter));
                         prevStreamGroupId = streamGroupId;
-                        prevIsLoading = isLoading;
+                        
                         frameCounter++;
 
                         Thread.Sleep(15);
@@ -372,13 +377,30 @@ namespace LiveSplit.FEAR
                 return null;
             }
 
-            /*if (game.MainModule.ModuleMemorySize != (int)ExpectedDllSizes.FEARSteam)
+            if(game.MainModule.ModuleMemorySize == (int)ExpectedDllSizes.FEARSteam)
+            {
+                _isLoadingPtr = new DeepPointer(0x00176FCC, 0x10, 0xE0, 0x8, 0x728); // == 1 if a loadscreen is happening
+                _levelNamePtr = new DeepPointer(0x16C036);
+                isVersion1_0 = false;
+            }
+            else if (game.MainModule.ModuleMemorySize == (int)ExpectedDllSizes.FEARGOG)
+            {
+                _isLoadingPtr = new DeepPointer(0x00176FCC, 0x10, 0xE0, 0x8, 0x728); // == 1 if a loadscreen is happening
+                _levelNamePtr = new DeepPointer(0x16C036);
+                isVersion1_0 = false;
+            }
+            else if(game.MainModule.ModuleMemorySize == (int)ExpectedDllSizes.FEARv1_0)
+            {
+                _levelNamePtr = new DeepPointer(0x163FCE);
+                isVersion1_0 = true;
+            }
+            else
             {
                 _ignorePIDs.Add(game.Id);
-                _uiThread.Send(d => MessageBox.Show("Unexpected game version. DXHR 1.4.651.0 or DXHRDC 2.0.0.0 is required.", "LiveSplit.DXHR",
+                _uiThread.Send(d => MessageBox.Show("Unexpected game version. FEAR v1.0 or 1.08 (Steam) is required.", "LiveSplit.FEAR",
                     MessageBoxButtons.OK, MessageBoxIcon.Error), null);
                 return null;
-            }*/
+            }
 
             return game;
         }
