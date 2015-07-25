@@ -10,6 +10,7 @@ namespace LiveSplit.FEAR
 {
     class GameMemory
     {
+        bool isCurrentPatch = true;
         public enum SplitArea : int
         {
             None,
@@ -171,8 +172,6 @@ namespace LiveSplit.FEAR
                     while (!game.HasExited)
                     {
                         bool isLoading;
-                        _isLoadingPtr.Deref(game, out isLoading);
-                        
 
                         string streamGroupIdCheck = String.Empty;
                         _levelNamePtr.Deref(game, out streamGroupIdCheck, 55);
@@ -269,15 +268,80 @@ namespace LiveSplit.FEAR
                             }
 
                         }
-
-                        if (isLoading != prevIsLoading)
+                        
+                        if(isCurrentPatch)
                         {
-                            if (isLoading)
+                            _isLoadingPtr.Deref(game, out isLoading);
+
+                            if (isLoading != prevIsLoading)
+                            {
+                                if (isLoading)
+                                {
+                                    Debug.WriteLine(String.Format("[NoLoads] Load Start - {0}", frameCounter));
+
+                                    loadingStarted = true;
+
+                                    // pause game timer
+                                    _uiThread.Post(d =>
+                                    {
+                                        if (this.OnLoadStarted != null)
+                                        {
+                                            this.OnLoadStarted(this, EventArgs.Empty);
+                                        }
+                                    }, null);
+
+                                    if (streamGroupId == LevelName.C01Inception)
+                                    {
+                                        // reset game timer
+                                        /*_uiThread.Post(d =>
+                                        {
+                                            if (this.OnFirstLevelLoading != null)
+                                            {
+                                                this.OnFirstLevelLoading(this, EventArgs.Empty);
+                                            }
+                                        }, null);*/
+                                    }
+                                }
+                                else
+                                {
+                                    Debug.WriteLine(String.Format("[NoLoads] Load End - {0}", frameCounter));
+                                    if (loadingStarted)
+                                    {
+                                        loadingStarted = false;
+
+                                        // unpause game timer
+                                        _uiThread.Post(d =>
+                                        {
+                                            if (this.OnLoadFinished != null)
+                                            {
+                                                this.OnLoadFinished(this, EventArgs.Empty);
+                                            }
+                                        }, null);
+
+                                        if (streamGroupId == LevelName.C01Inception)
+                                        {
+                                            // start game timer
+                                            _uiThread.Post(d =>
+                                            {
+                                                if (this.OnPlayerGainedControl != null)
+                                                {
+                                                    this.OnPlayerGainedControl(this, EventArgs.Empty);
+                                                }
+                                            }, null);
+                                        }
+                                    }
+                                }
+                            }
+                            prevIsLoading = isLoading;
+                        }                                                               //Version 1.0
+                        else
+                        {
+                            if(streamGroupIdCheck == String.Empty)
                             {
                                 Debug.WriteLine(String.Format("[NoLoads] Load Start - {0}", frameCounter));
-
+                                
                                 loadingStarted = true;
-
+                                
                                 // pause game timer
                                 _uiThread.Post(d =>
                                 {
@@ -286,18 +350,6 @@ namespace LiveSplit.FEAR
                                         this.OnLoadStarted(this, EventArgs.Empty);
                                     }
                                 }, null);
-
-                                if (streamGroupId == LevelName.C01Inception)
-                                {
-                                    // reset game timer
-                                    /*_uiThread.Post(d =>
-                                    {
-                                        if (this.OnFirstLevelLoading != null)
-                                        {
-                                            this.OnFirstLevelLoading(this, EventArgs.Empty);
-                                        }
-                                    }, null);*/
-                                }
                             }
                             else
                             {
@@ -329,7 +381,6 @@ namespace LiveSplit.FEAR
                                 }
                             }
                         }
-                        prevIsLoading = isLoading;
 
                         Debug.WriteLineIf(streamGroupId != prevStreamGroupId, String.Format("[NoLoads] streamGroupId changed from {0} to {1} - {2}", prevStreamGroupId, streamGroupId, frameCounter));
                         prevStreamGroupId = streamGroupId;
@@ -376,16 +427,18 @@ namespace LiveSplit.FEAR
             {
                 _isLoadingPtr = new DeepPointer(0x00176FCC, 0x10, 0xE0, 0x8, 0x728); // == 1 if a loadscreen is happening
                 _levelNamePtr = new DeepPointer(0x16C036);
+                isCurrentPatch = true;
             }
             else if (game.MainModule.ModuleMemorySize == (int)ExpectedDllSizes.FEARGOG)
             {
                 _isLoadingPtr = new DeepPointer(0x00176FCC, 0x10, 0xE0, 0x8, 0x728); // == 1 if a loadscreen is happening
                 _levelNamePtr = new DeepPointer(0x16C036);
+                isCurrentPatch = true;
             }
             else if(game.MainModule.ModuleMemorySize == (int)ExpectedDllSizes.FEARv1_0)
             {
-                _isLoadingPtr = new DeepPointer(0x0016E910, 0x1e8, 0x4, 0x80, 0x4C44);
                 _levelNamePtr = new DeepPointer(0x163FCE);
+                isCurrentPatch = false;
             }
             else
             {

@@ -1,4 +1,14 @@
 <updates>
+<update version="1.0.3">
+<files>
+<file path="Components/LiveSplit.FEAR.dll" status="changed"/>
+</files>
+<changelog>
+<change>
+Made loading on 1.0 based on map currently loaded.
+</change>
+</changelog>
+</update>
 <update version="1.0.2">
 <files>
 <file path="Components/LiveSplit.FEAR.dll" status="changed"/>
