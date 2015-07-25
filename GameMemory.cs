@@ -87,7 +87,7 @@ namespace LiveSplit.FEAR
         {
             FEARv1_0 = 10059776,
             FEARGOG = 1691648,
-            FEARSteam = 29642752,
+            FEARSteam = 2043904,
         }
 
         public bool[] splitStates { get; set; }
