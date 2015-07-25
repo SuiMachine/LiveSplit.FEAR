@@ -10,8 +10,6 @@ namespace LiveSplit.FEAR
 {
     class GameMemory
     {
-        bool isVersion1_0 = false;
-
         public enum SplitArea : int
         {
             None,
@@ -173,10 +171,7 @@ namespace LiveSplit.FEAR
                     while (!game.HasExited)
                     {
                         bool isLoading;
-                        if (!isVersion1_0)
-                            _isLoadingPtr.Deref(game, out isLoading);
-                        else
-                            isLoading = Convert.ToBoolean(TrainerRead.ReadByte("FEAR", 0x1018CB3C));    //Nice mess, eh?
+                        _isLoadingPtr.Deref(game, out isLoading);
                         
 
                         string streamGroupIdCheck = String.Empty;
@@ -381,18 +376,16 @@ namespace LiveSplit.FEAR
             {
                 _isLoadingPtr = new DeepPointer(0x00176FCC, 0x10, 0xE0, 0x8, 0x728); // == 1 if a loadscreen is happening
                 _levelNamePtr = new DeepPointer(0x16C036);
-                isVersion1_0 = false;
             }
             else if (game.MainModule.ModuleMemorySize == (int)ExpectedDllSizes.FEARGOG)
             {
                 _isLoadingPtr = new DeepPointer(0x00176FCC, 0x10, 0xE0, 0x8, 0x728); // == 1 if a loadscreen is happening
                 _levelNamePtr = new DeepPointer(0x16C036);
-                isVersion1_0 = false;
             }
             else if(game.MainModule.ModuleMemorySize == (int)ExpectedDllSizes.FEARv1_0)
             {
+                _isLoadingPtr = new DeepPointer(0x0016E910, 0x1e8, 0x4, 0x80, 0x4C44);
                 _levelNamePtr = new DeepPointer(0x163FCE);
-                isVersion1_0 = true;
             }
             else
             {
