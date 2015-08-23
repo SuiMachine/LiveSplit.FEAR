@@ -35,6 +35,7 @@ namespace LiveSplit.FEAR
             this.Settings = new FEARSettings();
 
            _timer = new TimerModel { CurrentState = state };
+           _timer.CurrentState.OnPause += timer_OnStart;
 
             _gameMemory = new GameMemory(this.Settings);
             //_gameMemory.OnFirstLevelLoading += gameMemory_OnFirstLevelLoading;
@@ -51,12 +52,18 @@ namespace LiveSplit.FEAR
             this.Disposed = true;
 
             _state.OnStart -= State_OnStart;
+            _timer.CurrentState.OnStart -= timer_OnStart;
 
             if (_gameMemory != null)
             {
                 _gameMemory.Stop();
             }
 
+        }
+
+        private void timer_OnStart(object sender, EventArgs e)
+        {
+            _timer.InitializeGameTime();
         }
 
         void State_OnStart(object sender, EventArgs e)

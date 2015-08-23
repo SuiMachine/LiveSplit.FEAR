@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using LiveSplit.ComponentUtil;
 
 namespace LiveSplit.FEAR
 {
@@ -423,19 +424,19 @@ namespace LiveSplit.FEAR
                 return null;
             }
 
-            if(game.MainModule.ModuleMemorySize == (int)ExpectedDllSizes.FEARSteam)
+            if(game.MainModuleWow64Safe().ModuleMemorySize == (int)ExpectedDllSizes.FEARSteam)
             {
                 _isLoadingPtr = new DeepPointer(0x00176FCC, 0x10, 0xE0, 0x8, 0x728); // == 1 if a loadscreen is happening
                 _levelNamePtr = new DeepPointer(0x16C036);
                 isCurrentPatch = true;
             }
-            else if (game.MainModule.ModuleMemorySize == (int)ExpectedDllSizes.FEARGOG)
+            else if (game.MainModuleWow64Safe().ModuleMemorySize == (int)ExpectedDllSizes.FEARGOG)
             {
                 _isLoadingPtr = new DeepPointer(0x00176FCC, 0x10, 0xE0, 0x8, 0x728); // == 1 if a loadscreen is happening
                 _levelNamePtr = new DeepPointer(0x16C036);
                 isCurrentPatch = true;
             }
-            else if(game.MainModule.ModuleMemorySize == (int)ExpectedDllSizes.FEARv1_0)
+            else if (game.MainModuleWow64Safe().ModuleMemorySize == (int)ExpectedDllSizes.FEARv1_0)
             {
                 _levelNamePtr = new DeepPointer(0x163FCE);
                 isCurrentPatch = false;

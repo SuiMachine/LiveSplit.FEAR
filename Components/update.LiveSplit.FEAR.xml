@@ -1,4 +1,13 @@
 <updates>
+<update version="1.0.4">
+<files>
+<file path="Components/LiveSplit.FEAR.dll" status="changed"/>
+</files>
+<changelog>
+<change>
+LiveSplit 1.6 compatibility
+</change>
+</changelog>
 <update version="1.0.3">
 <files>
 <file path="Components/LiveSplit.FEAR.dll" status="changed"/>
