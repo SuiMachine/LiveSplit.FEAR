@@ -175,7 +175,7 @@ namespace LiveSplit.FEAR
                         bool isLoading;
 
                         string streamGroupIdCheck = String.Empty;
-                        _levelNamePtr.Deref(game, out streamGroupIdCheck, 55);
+                        _levelNamePtr.DerefString(game, 55, out streamGroupIdCheck);
                         if(streamGroupIdCheck != String.Empty)
                         {
                             streamGroupId = streamGroupIdCheck;                             //Since during loading it changes to null
