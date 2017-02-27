@@ -1,12 +1,18 @@
 <updates>
+<update version="1.1.0">
+<files>
+<file path="Components/LiveSplit.FEAR.dll" status="changed"/>
+</files>
+<changelog>
+<change>Updated with a new method of reading whatever the game loads or not, that uses Gam*.tmp module.</change>
+</changelog>
+</update>
 <update version="1.0.5">
 <files>
 <file path="Components/LiveSplit.FEAR.dll" status="changed"/>
 </files>
 <changelog>
-<change>
-Moved entirely to LiveSplits internal deep pointer libary.
-</change>
+<change>Moved entirely to LiveSplits internal deep pointer libary.</change>
 </changelog>
 </update>
 <update version="1.0.4">
@@ -14,9 +20,7 @@ Moved entirely to LiveSplits internal deep pointer libary.
 <file path="Components/LiveSplit.FEAR.dll" status="changed"/>
 </files>
 <changelog>
-<change>
-LiveSplit 1.6 compatibility
-</change>
+<change>LiveSplit 1.6 compatibility</change>
 </changelog>
 </update>
 <update version="1.0.3">
@@ -24,9 +28,7 @@ LiveSplit 1.6 compatibility
 <file path="Components/LiveSplit.FEAR.dll" status="changed"/>
 </files>
 <changelog>
-<change>
-Made loading on 1.0 based on map currently loaded.
-</change>
+<change>Made loading on 1.0 based on map currently loaded.</change>
 </changelog>
 </update>
 <update version="1.0.2">
@@ -34,9 +36,7 @@ Made loading on 1.0 based on map currently loaded.
 <file path="Components/LiveSplit.FEAR.dll" status="changed"/>
 </files>
 <changelog>
-<change>
-Fixed process lenght for Steam version.
-</change>
+<change>Fixed process lenght for Steam version.</change>
 </changelog>
 </update>
 <update version="1.0.1">
@@ -44,9 +44,7 @@ Fixed process lenght for Steam version.
 <file path="Components/LiveSplit.FEAR.dll" status="changed"/>
 </files>
 <changelog>
-<change>
-Replaced IsLoading static adress with 4 level deep pointer.
-</change>
+<change>Replaced IsLoading static adress with 4 level deep pointer.</change>
 </changelog>
 </update>
 <update version="1.0.0">
@@ -54,9 +52,7 @@ Replaced IsLoading static adress with 4 level deep pointer.
 <file path="Components/LiveSplit.FEAR.dll" status="changed"/>
 </files>
 <changelog>
-<change>
-Version 1.0 support (still messy).
-</change>
+<change>Version 1.0 support (still messy).</change>
 </changelog>
 </update>
 <update version="0.9.0">
@@ -64,9 +60,7 @@ Version 1.0 support (still messy).
 <file path="Components/LiveSplit.FEAR.dll" status="changed"/>
 </files>
 <changelog>
-<change>
-Initial release
-</change>
+<change>Initial release</change>
 </changelog>
 </update>
 </updates>

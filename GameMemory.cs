@@ -11,7 +11,6 @@ namespace LiveSplit.FEAR
 {
     class GameMemory
     {
-        bool isCurrentPatch = true;
         public enum SplitArea : int
         {
             None,
@@ -44,6 +43,7 @@ namespace LiveSplit.FEAR
         public event EventHandler OnLoadFinished;
         public delegate void SplitCompletedEventHandler(object sender, SplitArea type, uint frame);
         public event SplitCompletedEventHandler OnSplitCompleted;
+        private string gameTmpModule = "";
 
         private Task _thread;
         private CancellationTokenSource _cancelSource;
@@ -269,80 +269,17 @@ namespace LiveSplit.FEAR
                             }
 
                         }
-                        
-                        if(isCurrentPatch)
+
+                        _isLoadingPtr.Deref(game, out isLoading);
+
+                        if (isLoading != prevIsLoading)
                         {
-                            _isLoadingPtr.Deref(game, out isLoading);
-
-                            if (isLoading != prevIsLoading)
-                            {
-                                if (isLoading)
-                                {
-                                    Debug.WriteLine(String.Format("[NoLoads] Load Start - {0}", frameCounter));
-
-                                    loadingStarted = true;
-
-                                    // pause game timer
-                                    _uiThread.Post(d =>
-                                    {
-                                        if (this.OnLoadStarted != null)
-                                        {
-                                            this.OnLoadStarted(this, EventArgs.Empty);
-                                        }
-                                    }, null);
-
-                                    if (streamGroupId == LevelName.C01Inception)
-                                    {
-                                        // reset game timer
-                                        /*_uiThread.Post(d =>
-                                        {
-                                            if (this.OnFirstLevelLoading != null)
-                                            {
-                                                this.OnFirstLevelLoading(this, EventArgs.Empty);
-                                            }
-                                        }, null);*/
-                                    }
-                                }
-                                else
-                                {
-                                    Debug.WriteLine(String.Format("[NoLoads] Load End - {0}", frameCounter));
-                                    if (loadingStarted)
-                                    {
-                                        loadingStarted = false;
-
-                                        // unpause game timer
-                                        _uiThread.Post(d =>
-                                        {
-                                            if (this.OnLoadFinished != null)
-                                            {
-                                                this.OnLoadFinished(this, EventArgs.Empty);
-                                            }
-                                        }, null);
-
-                                        if (streamGroupId == LevelName.C01Inception)
-                                        {
-                                            // start game timer
-                                            _uiThread.Post(d =>
-                                            {
-                                                if (this.OnPlayerGainedControl != null)
-                                                {
-                                                    this.OnPlayerGainedControl(this, EventArgs.Empty);
-                                                }
-                                            }, null);
-                                        }
-                                    }
-                                }
-                            }
-                            prevIsLoading = isLoading;
-                        }                                                               //Version 1.0
-                        else
-                        {
-                            if(streamGroupIdCheck == String.Empty)
+                            if (isLoading)
                             {
                                 Debug.WriteLine(String.Format("[NoLoads] Load Start - {0}", frameCounter));
-                                
+
                                 loadingStarted = true;
-                                
+
                                 // pause game timer
                                 _uiThread.Post(d =>
                                 {
@@ -351,6 +288,18 @@ namespace LiveSplit.FEAR
                                         this.OnLoadStarted(this, EventArgs.Empty);
                                     }
                                 }, null);
+
+                                if (streamGroupId == LevelName.C01Inception)
+                                {
+                                    // reset game timer
+                                    /*_uiThread.Post(d =>
+                                    {
+                                        if (this.OnFirstLevelLoading != null)
+                                        {
+                                            this.OnFirstLevelLoading(this, EventArgs.Empty);
+                                        }
+                                    }, null);*/
+                                }
                             }
                             else
                             {
@@ -382,6 +331,8 @@ namespace LiveSplit.FEAR
                                 }
                             }
                         }
+                        prevIsLoading = isLoading;
+
 
                         Debug.WriteLineIf(streamGroupId != prevStreamGroupId, String.Format("[NoLoads] streamGroupId changed from {0} to {1} - {2}", prevStreamGroupId, streamGroupId, frameCounter));
                         prevStreamGroupId = streamGroupId;
@@ -419,27 +370,35 @@ namespace LiveSplit.FEAR
         Process GetGameProcess()
         {
             Process game = Process.GetProcesses().FirstOrDefault(p => p.ProcessName.ToLower() == "fear" && !p.HasExited && !_ignorePIDs.Contains(p.Id));
-            if (game == null)
+            
+            if(game != null && gameTmpModule == "")
             {
+                ProcessModuleWow64Safe[] modules = game.ModulesWow64Safe();
+                ProcessModuleWow64Safe tmpModule = modules.First(m => m.ModuleName.StartsWith("Gam") && m.ModuleName.EndsWith(".tmp"));
+                if (tmpModule != null)
+                    gameTmpModule = tmpModule.ModuleName;
+            }
+
+            if (game == null || gameTmpModule == "")
+            {
+                gameTmpModule = "";
                 return null;
             }
 
-            if(game.MainModuleWow64Safe().ModuleMemorySize == (int)ExpectedDllSizes.FEARSteam)
+            if (game.MainModuleWow64Safe().ModuleMemorySize == (int)ExpectedDllSizes.FEARSteam)
             {
-                _isLoadingPtr = new DeepPointer(0x00176FCC, 0x10, 0xE0, 0x8, 0x728); // == 1 if a loadscreen is happening
+                _isLoadingPtr = new DeepPointer(gameTmpModule, 0x1AA3E4); // == 1 if a loadscreen is happening
                 _levelNamePtr = new DeepPointer(0x16C036);
-                isCurrentPatch = true;
             }
             else if (game.MainModuleWow64Safe().ModuleMemorySize == (int)ExpectedDllSizes.FEARGOG)
             {
-                _isLoadingPtr = new DeepPointer(0x00176FCC, 0x10, 0xE0, 0x8, 0x728); // == 1 if a loadscreen is happening
+                _isLoadingPtr = new DeepPointer(gameTmpModule, 0x1AA3E4); // May need to be fixed?
                 _levelNamePtr = new DeepPointer(0x16C036);
-                isCurrentPatch = true;
             }
             else if (game.MainModuleWow64Safe().ModuleMemorySize == (int)ExpectedDllSizes.FEARv1_0)
             {
+                _isLoadingPtr = new DeepPointer(gameTmpModule, 0x18CB3C);
                 _levelNamePtr = new DeepPointer(0x163FCE);
-                isCurrentPatch = false;
             }
             else
             {
