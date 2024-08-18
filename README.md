@@ -34,6 +34,6 @@ https://github.com/drtchops/LiveSplit.DXHR/releases
 Credits
 -------
   * [DrTChops](http://twitch.tv/drtchops)
-  * [SuicideMachine](http://twitch.tv/suicidemachine)
+  * [SuicideMachine](http://twitch.tv/suimachine)
   * Memory Addresses are from [DXHR-autosplitter](https://github.com/atennapel/Deus-Ex-Human-Revolution-autosplitter) by [Labbekak](http://www.twitch.tv/labbekak).
   * Plugin is based off [LiveSplit.Dishonored](https://github.com/fatalis/LiveSplit.Dishonored) by [Fatalis](http://twitch.tv/fatalis_).
